@@ -1,0 +1,33 @@
+# --- Root Workspace config ---
+.idea
+.vscode
+.DS_Store
+*.log
+*.txt
+!DEPLOYMENT.md
+!WALKTHROUGH.md
+
+# --- Backend (Spring Boot / Maven) ---
+**/target/
+**/.mvn/wrapper/maven-wrapper.jar
+**/.apt_generated
+**/.classpath
+**/.factorypath
+**/.project
+**/.settings
+**/.springBeans
+**/.sts4-cache
+**/*.iws
+**/*.iml
+**/*.ipr
+
+# --- Frontend (Vite / React) ---
+**/node_modules/
+**/dist/
+**/dist-ssr
+**/*.local
+
+# --- Docker & Infrastructure ---
+**/postgres-data/
+**/mongo-data/
+**/.docker/

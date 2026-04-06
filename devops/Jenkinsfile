@@ -1,0 +1,56 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_CREDS = credentials('docker-credentials')
+        KUBECONFIG   = credentials('kubeconfig-credentials')
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build Java Backend') {
+            steps {
+                sh 'mvn clean package -DskipTests'
+            }
+        }
+
+        stage('Build React Frontend') {
+            steps {
+                dir('frontend-dashboard') {
+                    sh 'npm install'
+                    sh 'npm run build'
+                }
+            }
+        }
+
+        stage('Docker Image Build') {
+            steps {
+                script {
+                    echo 'Building API Gateway...'
+                    sh 'docker build -t myacr.azurecr.io/crm-gateway:latest ./api-gateway'
+                    // Repeated for auth, customer, etc.
+                }
+            }
+        }
+
+        stage('Push Images') {
+            steps {
+                script {
+                    sh 'echo $DOCKER_CREDS_PSW | docker login -u $DOCKER_CREDS_USR --password-stdin myacr.azurecr.io'
+                    sh 'docker push myacr.azurecr.io/crm-gateway:latest'
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh 'kubectl apply -f devops/k8s-deployment.yaml'
+            }
+        }
+    }
+}
